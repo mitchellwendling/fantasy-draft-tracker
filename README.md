@@ -1,9 +1,9 @@
 # Auction Draft Tracker
 
-A live tracker for the league's $200 auction draft — the spreadsheet, but it
+A live tracker for the league's $200 auction draft - the spreadsheet, but it
 does the arithmetic for you while the room is shouting.
 
-Built from eight seasons of results (2018–2025) pulled out of the league's
+Built from eight seasons of results (2018-2025) pulled out of the league's
 Google Sheet, so every player you nominate arrives with what this league has
 actually paid for them before.
 
@@ -14,7 +14,7 @@ actually paid for them before.
 It is plain HTML, CSS and JavaScript. No build step, no server, no account, no
 network connection required once the page is open.
 
-**Easiest:** open `dist/draft-tracker.html` — one self-contained file. Double-click
+**Easiest:** open `dist/draft-tracker.html` - one self-contained file. Double-click
 it, or email/AirDrop it to your phone and open it there.
 
 **From the source files:** open `index.html` directly, or serve the folder:
@@ -37,7 +37,7 @@ The **Draft** tab is the only one you need while picks are flying.
 
 1. Start typing a player's name. The dropdown shows their position and what
    they have gone for in this league before (`avg $32 · hi $50`).
-2. Press **Enter** to take the highlighted name — the cursor jumps to the price.
+2. Press **Enter** to take the highlighted name - the cursor jumps to the price.
 3. Type the winning bid, click the buyer's chip (or use the dropdown), hit
    **Enter**.
 
@@ -53,9 +53,9 @@ by hand always wins.
 | | |
 |---|---|
 | **Max bid** | The most a team can still bid and fill every remaining spot at $1. Shown on every team card and every chip. |
-| **Roster slots** | Each pick drops into the first legal slot — starters first, then FLEX, then bench. Anything past 17 is flagged `OVER`. |
+| **Roster slots** | Each pick drops into the first legal slot - starters first, then FLEX, then bench. Anything past 17 is flagged `OVER`. |
 | **Needs** | Red badges on each team card for starting slots they have not filled. |
-| **Scarcity** | "Starters still needed: RB ×14, TE ×8" — how many teams are still shopping at each position. |
+| **Scarcity** | "Starters still needed: RB ×14, TE ×8" - how many teams are still shopping at each position. |
 | **Market heat** | Whether money is leaving the room faster than roster spots. Above the line means the players still on the board will go cheap. Stays quiet until enough picks have happened to mean anything. |
 | **Price history** | Every player's past prices in this league, matched through nicknames and typos. |
 
@@ -64,7 +64,7 @@ by hand always wins.
 - Bidding more than a team can afford asks you to confirm first.
 - Drafting someone already taken asks you to confirm first.
 - A full roster refuses more picks.
-- Everything is undoable — `Ctrl+Z` / `Cmd+Z`, or the ✕ on any pick.
+- Everything is undoable - `Ctrl+Z` / `Cmd+Z`, or the ✕ on any pick.
 
 ### Keyboard
 
@@ -81,7 +81,7 @@ by hand always wins.
 ## Not losing the draft
 
 Every change is written to this browser's local storage immediately. Closing
-the tab, refreshing, or a dead battery all leave the draft intact — reopen the
+the tab, refreshing, or a dead battery all leave the draft intact - reopen the
 page and it is exactly where you left it. Open a second tab and the two stay in
 step.
 
@@ -101,15 +101,15 @@ banner says so at the top and the tab warns you before it closes.
 Change any of it before or during the draft; everything recalculates.
 
 - **Budget** and **season**
-- **Roster slots** — QB / RB / WR / TE / FLEX / DST / K / bench counts
-- **Teams** — rename, reorder (this is the nomination order), add, remove
-- **My team** — highlights your card and puts your max bid in the top bar
-- **Bid clock** — optional countdown with a beep, 0 turns it off
+- **Roster slots** - QB / RB / WR / TE / FLEX / DST / K / bench counts
+- **Teams** - rename, reorder (this is the nomination order), add, remove
+- **My team** - highlights your card and puts your max bid in the top bar
+- **Bid clock** - optional countdown with a beep, 0 turns it off
 
 ### Importing a player list
 
 The bundled autocomplete pool is the league's own eight years of names plus a
-list of currently relevant players. It is a convenience, not a rulebook — you
+list of currently relevant players. It is a convenience, not a rulebook - you
 can always type a name that is in neither.
 
 If your host site exports a player list or ADP sheet, **Setup → Import player
@@ -123,9 +123,9 @@ the bundled list.
 
 Read off the 2025 sheet:
 
-- **8 teams** — Mitchell, Randy, Rob, Jay, Andy, Cody, Tyler, Ryan
+- **8 teams** - Mitchell, Randy, Rob, Jay, Andy, Cody, Tyler, Ryan
 - **$200** per team
-- **17 roster spots** — QB, RB, RB, WR, WR, TE, FLEX, DST, K, and 8 bench
+- **17 roster spots** - QB, RB, RB, WR, WR, TE, FLEX, DST, K, and 8 bench
 
 ---
 
@@ -142,8 +142,8 @@ test.mjs            browser tests (Playwright)
 ```
 
 `data/history.js` is transcribed verbatim from the spreadsheet, typos and all
-("Zeke", "McCaffery", "Nakua"). `app.js` normalizes names — punctuation,
-suffixes, nicknames, and a small edit distance — so a correctly spelled name
+("Zeke", "McCaffery", "Nakua"). `app.js` normalizes names - punctuation,
+suffixes, nicknames, and a small edit distance - so a correctly spelled name
 today still finds its own history.
 
 ## Tests

@@ -28,7 +28,7 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-function money(n) { return '$' + (n == null || isNaN(n) ? '—' : Math.round(n)); }
+function money(n) { return '$' + (n == null || isNaN(n) ? '-' : Math.round(n)); }
 function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
@@ -587,10 +587,10 @@ function renderScoreboard() {
   var cells = [
     ['Pick', STATE.picks.length + ' / ' + L.totalSlots],
     ['Spent', money(L.spent) + ' of ' + money(L.totalBudget)],
-    ['$ / open spot', L.openSlots ? '$' + L.perSlot.toFixed(1) : '—'],
+    ['$ / open spot', L.openSlots ? '$' + L.perSlot.toFixed(1) : '-'],
     ['Market', L.heat == null ? '<span class="muted">early</span>'
              : L.heat > 1.06 ? 'Hot +' + Math.round((L.heat - 1) * 100) + '%'
-             : L.heat < 0.94 ? 'Cold −' + Math.round((1 - L.heat) * 100) + '%'
+             : L.heat < 0.94 ? 'Cold -' + Math.round((1 - L.heat) * 100) + '%'
              : 'Even'],
     ['Top bid left', money(L.topBid)]
   ];
@@ -639,7 +639,7 @@ function renderTeams() {
     var rows = t.lineup.slots.map(function (slot, i) {
       var p = t.lineup.filled[i];
       if (!p) return '<div class="tc-row empty"><span class="slot">' + esc(slot) +
-        '</span><span class="nm">—</span><span class="pr"></span></div>';
+        '</span><span class="nm">-</span><span class="pr"></span></div>';
       return '<div class="tc-row"><span class="slot">' + esc(slot) + '</span>' +
         '<span class="nm" title="' + esc(p.player) + '">' + esc(p.player) + '</span>' +
         '<span class="pr">' + money(p.price) + '</span></div>';
@@ -666,7 +666,7 @@ function renderFeed() {
   var el = $('#pickFeed');
   $('#pickCountLabel').textContent = STATE.picks.length ? '(' + STATE.picks.length + ')' : '';
   if (!STATE.picks.length) {
-    el.innerHTML = '<div class="empty-state">No picks yet. Record the first one on the left — ' +
+    el.innerHTML = '<div class="empty-state">No picks yet. Record the first one on the left - ' +
       'or open <strong>Setup</strong> first to check the teams and budget.</div>';
     return;
   }
@@ -690,7 +690,7 @@ function renderMarket() {
   var cells = [
     ['Money left in room', money(L.left)],
     ['Roster spots left', L.openSlots],
-    ['Avg per spot', L.openSlots ? '$' + L.perSlot.toFixed(1) : '—'],
+    ['Avg per spot', L.openSlots ? '$' + L.perSlot.toFixed(1) : '-'],
     ['Spent', Math.round(L.spentPct * 100) + '%']
   ];
   var scarceHtml = Object.keys(need).filter(function (k) { return need[k] > 0; })
@@ -728,7 +728,7 @@ function renderBoard() {
     html += '<tr' + (isFirstBench ? ' class="bench-start"' : '') + '><td class="slot-cell">' + esc(slot) + '</td>';
     infos.forEach(function (t) {
       var p = t.lineup.filled[i];
-      html += '<td>' + (p ? esc(p.player) : '<span class="muted">—</span>') + '</td>' +
+      html += '<td>' + (p ? esc(p.player) : '<span class="muted">-</span>') + '</td>' +
               '<td class="money">' + (p ? money(p.price) : '') + '</td>';
     });
     html += '</tr>';
@@ -761,7 +761,7 @@ function sparkline(stats) {
   var rows = stats.rows.slice(0, 6).reverse();
   var max = Math.max.apply(null, rows.map(function (r) { return r.price || 0; })) || 1;
   return '<span class="spark" title="' + esc(rows.map(function (r) {
-    return r.year + ': ' + (r.price == null ? '—' : '$' + r.price);
+    return r.year + ': ' + (r.price == null ? '-' : '$' + r.price);
   }).join('  ')) + '">' + rows.map(function (r) {
     return '<i style="height:' + Math.max(2, Math.round(16 * (r.price || 0) / max)) + 'px"></i>';
   }).join('') + '</span>';
@@ -788,7 +788,7 @@ function renderPool() {
     var s = p.hist;
     var t = d ? teamById(d.teamId) : null;
     return '<tr class="' + (d ? 'is-drafted' : '') + '" data-pick="' + esc(p.name) + '" data-pos="' + esc(p.pos) + '">' +
-      '<td>' + posTag(p.pos === '?' ? '—' : p.pos) + '</td>' +
+      '<td>' + posTag(p.pos === '?' ? '-' : p.pos) + '</td>' +
       '<td class="p-name">' + esc(p.name) + '</td>' +
       '<td class="money">' + (s && s.last ? '$' + s.last.price + ' <span class="muted">' + s.last.year + '</span>' : '') + '</td>' +
       '<td class="money">' + (s && s.recentAvg != null ? '$' + s.recentAvg.toFixed(0) : '') + '</td>' +
@@ -830,7 +830,7 @@ function renderHistory() {
     html += '</tr>';
   }
   html += '<tr class="total-row"><td class="slot-cell">LEFT</td>' + season.teams.map(function (t) {
-    return '<td></td><td class="money">' + (t.left == null ? '—' : '$' + t.left) + '</td>';
+    return '<td></td><td class="money">' + (t.left == null ? '-' : '$' + t.left) + '</td>';
   }).join('') + '</tr></tbody>';
   $('#histTable').innerHTML = html;
 }
@@ -846,12 +846,12 @@ function renderHistSearch(q) {
   var s = found.stats;
   el.innerHTML = '<div class="card">' +
     '<div class="card-head"><h2>' + esc(s.rows[0].raw) + '</h2>' +
-    '<span class="muted">' + s.n + ' drafts · avg ' + (s.avg != null ? '$' + s.avg.toFixed(1) : '—') +
+    '<span class="muted">' + s.n + ' drafts · avg ' + (s.avg != null ? '$' + s.avg.toFixed(1) : '-') +
     ' · high $' + s.max + '</span></div>' +
     s.rows.map(function (r) {
       return '<div class="hist-line"><span><span class="hist-yr">' + r.year + '</span> ' +
         esc(r.team) + ' <span class="muted">· ' + esc(r.slot) + '</span></span>' +
-        '<strong>' + (r.price == null ? '—' : '$' + r.price) + '</strong></div>';
+        '<strong>' + (r.price == null ? '-' : '$' + r.price) + '</strong></div>';
     }).join('') + '</div>';
 }
 
@@ -884,7 +884,7 @@ function renderSetup() {
   var src = STATE.customPool ? STATE.customPool.length + ' players imported from CSV (in use).'
                              : 'Using the bundled list plus every name from 2018-2025.';
   $('#importNote').innerHTML = esc(src) +
-    ' CSV columns: <code>name,pos</code> — optional <code>team</code>, <code>value</code>.';
+    ' CSV columns: <code>name,pos</code> - optional <code>team</code>, <code>value</code>.';
 }
 
 /* =========================================================================
@@ -933,7 +933,7 @@ function renderAc() {
     var meta = d ? 'drafted ' + money(d.price)
                  : (s && s.recentAvg != null ? 'avg $' + s.recentAvg.toFixed(0) + ' · hi $' + s.max : 'no history');
     return '<div class="ac-item' + (i === acSel ? ' is-sel' : '') + (d ? ' is-drafted' : '') + '" data-i="' + i + '">' +
-      posTag(p.pos === '?' ? '—' : p.pos) +
+      posTag(p.pos === '?' ? '-' : p.pos) +
       '<span class="ac-name">' + esc(p.name) + '</span>' +
       '<span class="ac-meta">' + esc(meta) + '</span></div>';
   }).join('');
@@ -1523,7 +1523,7 @@ function init() {
 
   if (!had) {
     setSaveState('Saved', '');
-    toast('New draft ready — check Setup if your teams or budget have changed', { ms: 6000 });
+    toast('New draft ready - check Setup if your teams or budget have changed', { ms: 6000 });
   } else {
     toast('Restored ' + STATE.picks.length + ' picks from this browser', { ms: 3000 });
   }
