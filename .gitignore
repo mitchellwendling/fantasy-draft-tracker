@@ -1,5 +1,6 @@
 node_modules/
 package-lock.json
-# dist/draft-tracker.html is committed on purpose: it is the grab-and-go copy
-# dist/
+# dist/draft-tracker.html is committed on purpose: it is the grab-and-go copy.
+# The Artifact build target is a byproduct, so it stays out.
+dist/artifact.html
 .DS_Store
