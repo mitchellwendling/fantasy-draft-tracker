@@ -17,3 +17,14 @@ for (const src of ['data/history.js', 'data/players.js', 'app.js']) {
 mkdirSync(new URL('./dist/', import.meta.url), { recursive: true });
 writeFileSync(new URL('./dist/draft-tracker.html', import.meta.url), html);
 console.log('dist/draft-tracker.html  ' + (html.length / 1024).toFixed(0) + ' KB');
+
+/* Second target: the same app as an Artifact body fragment. Artifacts supply
+ * their own <!doctype>/<html>/<head>/<body>, so this emits title + style +
+ * body contents only. */
+{
+  const body = html.slice(html.indexOf('<body>') + 6, html.lastIndexOf('</body>'));
+  const style = html.slice(html.indexOf('<style>'), html.indexOf('</style>') + 8);
+  const out = '<title>Auction Draft Room</title>\n' + style + '\n' + body.trim() + '\n';
+  writeFileSync(new URL('./dist/artifact.html', import.meta.url), out);
+  console.log('dist/artifact.html       ' + (out.length / 1024).toFixed(0) + ' KB');
+}

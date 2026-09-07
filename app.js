@@ -1096,13 +1096,51 @@ function beep() {
 
 /* --- import / export --------------------------------------------------- */
 
+/* When this page is served as a hosted Artifact the viewer sandbox blocks
+ * ordinary download links, so saving goes through the host instead. Opened
+ * from a file or a local server, window.claude is absent and the plain blob
+ * path runs. Either way the caller just awaits a boolean. */
+var HOST_SAVE = null;
+(function () {
+  if (!window.claude || typeof window.claude.use !== 'function') return;
+  try {
+    window.claude.use('downloads').then(function (d) { HOST_SAVE = d || null; },
+                                        function () { HOST_SAVE = null; });
+  } catch (e) {}
+})();
+
 function download(filename, text, mime) {
+  if (HOST_SAVE) {
+    return HOST_SAVE.save({ filename: filename, data: text }).then(function () {
+      return true;
+    }, function (err) {
+      var code = err && err.code;
+      if (code !== 'declined') {
+        toast('Could not save ' + filename + '. Copy it from the box instead.', { bad: true });
+        showTextFallback(filename, text);
+      }
+      return false;
+    });
+  }
   var blob = new Blob([text], { type: (mime || 'text/plain') + ';charset=utf-8' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click();
   setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 500);
+  return Promise.resolve(true);
+}
+
+/* Last resort: put the file on screen so it can be copied by hand. A draft
+ * should never be trapped in a browser because a save was refused. */
+function showTextFallback(filename, text) {
+  openModal('<h2>' + esc(filename) + '</h2>' +
+    '<p class="note">Saving is not available here. Select all of this and paste it into a file.</p>' +
+    '<textarea readonly style="width:100%;height:300px;font-family:var(--mono);font-size:11px;' +
+    'border:1px solid var(--line-2);border-radius:8px;padding:8px;background:var(--bg);color:var(--ink)">' +
+    esc(text) + '</textarea>');
+  var ta = $('#modalBody textarea');
+  if (ta) { ta.focus(); ta.select(); }
 }
 
 function csvCell(v) {
@@ -1226,8 +1264,8 @@ function exportJson() {
     state: JSON.parse(snapshot())
   };
   download('draft-' + STATE.season + '-' + new Date().toISOString().slice(0, 10) + '.json',
-           JSON.stringify(payload, null, 2), 'application/json');
-  toast('Backup downloaded');
+           JSON.stringify(payload, null, 2), 'application/json')
+    .then(function (saved) { if (saved) toast('Backup saved'); });
 }
 
 function importJson(text) {
@@ -1410,9 +1448,12 @@ function wire() {
   /* data */
   $('#btnExportJson').onclick = exportJson;
   $('#btnExportCsv').onclick = $('#btnExportCsv2').onclick = function () {
-    download('draft-board-' + STATE.season + '.csv', boardCsv(), 'text/csv');
-    download('draft-picks-' + STATE.season + '.csv', pickLogCsv(), 'text/csv');
-    toast('Board and pick log downloaded');
+    download('draft-board-' + STATE.season + '.csv', boardCsv(), 'text/csv')
+      .then(function (saved) {
+        if (!saved) return null;
+        return download('draft-picks-' + STATE.season + '.csv', pickLogCsv(), 'text/csv');
+      })
+      .then(function (saved) { if (saved) toast('Board and pick log saved'); });
   };
   $('#btnPrint').onclick = function () { window.print(); };
   $('#fileJson').addEventListener('change', function () {

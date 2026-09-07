@@ -31,8 +31,12 @@
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"Helvetica Neue",Arial,sans-serif;
 }
 
+/* Dark tokens are declared twice on purpose: once for viewers on the
+ * default "system" setting, and once for an explicit dark choice, so an
+ * explicit light choice still beats a dark OS. */
 @media (prefers-color-scheme: dark){
-  :root{
+  :root:not([data-theme="light"]){
+
     --bg:#0e1116;
     --bg-elev:#161a21;
     --bg-sunk:#0a0d11;
@@ -53,7 +57,32 @@
     --mine:#b18bff;
     --mine-soft:#231a3a;
     --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+  
   }
+}
+:root[data-theme="dark"]{
+
+    --bg:#0e1116;
+    --bg-elev:#161a21;
+    --bg-sunk:#0a0d11;
+    --ink:#e9edf3;
+    --ink-2:#a8b2c1;
+    --ink-3:#727d8d;
+    --line:#242a33;
+    --line-2:#333b47;
+    --accent:#4d90f0;
+    --accent-ink:#0b0f14;
+    --accent-soft:#16233a;
+    --good:#4ec98a;
+    --good-soft:#12261d;
+    --warn:#e5a53f;
+    --warn-soft:#2a2010;
+    --bad:#f2665c;
+    --bad-soft:#2c1513;
+    --mine:#b18bff;
+    --mine-soft:#231a3a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+  
 }
 
 *{box-sizing:border-box}
@@ -213,13 +242,19 @@ select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,va
 .pos-DST{background:#e2e2ec;color:#3f4260}
 .pos-K{background:#f2ecda;color:#6d5c1e}
 @media (prefers-color-scheme: dark){
-  .pos-QB{background:#3a1a28;color:#f0a9c6}
-  .pos-RB{background:#123024;color:#68d69e}
-  .pos-WR{background:#132744;color:#7fb0f5}
-  .pos-TE{background:#3a2413;color:#e8a877}
-  .pos-DST{background:#232636;color:#b4b8d4}
-  .pos-K{background:#2e2812;color:#d9c77a}
+  :root:not([data-theme="light"]) .pos-QB{background:#3a1a28;color:#f0a9c6}
+  :root:not([data-theme="light"]) .pos-RB{background:#123024;color:#68d69e}
+  :root:not([data-theme="light"]) .pos-WR{background:#132744;color:#7fb0f5}
+  :root:not([data-theme="light"]) .pos-TE{background:#3a2413;color:#e8a877}
+  :root:not([data-theme="light"]) .pos-DST{background:#232636;color:#b4b8d4}
+  :root:not([data-theme="light"]) .pos-K{background:#2e2812;color:#d9c77a}
 }
+:root[data-theme="dark"] .pos-QB{background:#3a1a28;color:#f0a9c6}
+:root[data-theme="dark"] .pos-RB{background:#123024;color:#68d69e}
+:root[data-theme="dark"] .pos-WR{background:#132744;color:#7fb0f5}
+:root[data-theme="dark"] .pos-TE{background:#3a2413;color:#e8a877}
+:root[data-theme="dark"] .pos-DST{background:#232636;color:#b4b8d4}
+:root[data-theme="dark"] .pos-K{background:#2e2812;color:#d9c77a}
 
 /* ---------- draft layout ---------- */
 .draft-layout{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}
