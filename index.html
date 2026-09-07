@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Auction Draft Tracker</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏈</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-row">
+    <h1 class="brand"><span class="brand-mark">🏈</span> Auction Draft <span class="brand-year" id="brandYear"></span></h1>
+    <div class="topbar-actions">
+      <button id="btnUndo" class="btn btn-ghost" title="Undo (Ctrl+Z)" disabled>↶ Undo</button>
+      <button id="btnRedo" class="btn btn-ghost" title="Redo (Ctrl+Shift+Z)" disabled>↷ Redo</button>
+      <span id="saveState" class="save-state" title="Every change is saved to this browser automatically">Saved</span>
+    </div>
+  </div>
+
+  <div class="scoreboard" id="scoreboard"><!-- rendered --></div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" data-tab="draft" role="tab">Draft</button>
+    <button class="tab" data-tab="board" role="tab">Board</button>
+    <button class="tab" data-tab="players" role="tab">Players</button>
+    <button class="tab" data-tab="history" role="tab">History</button>
+    <button class="tab" data-tab="setup" role="tab">Setup</button>
+  </nav>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+
+<main>
+
+  <!-- ================= DRAFT ================= -->
+  <section class="panel" data-panel="draft">
+    <div class="draft-layout">
+
+      <div class="col-entry">
+        <div class="card card-entry">
+          <div class="card-head">
+            <h2>Record a pick</h2>
+            <span class="hint">Enter, then keep typing</span>
+          </div>
+
+          <form id="pickForm" autocomplete="off">
+            <div class="field field-player">
+              <label for="inPlayer">Player</label>
+              <input id="inPlayer" type="text" placeholder="Start typing a name…" spellcheck="false" required>
+              <div id="acList" class="ac" hidden></div>
+            </div>
+
+            <div class="field-row">
+              <div class="field field-pos">
+                <label for="inPos">Pos</label>
+                <select id="inPos">
+                  <option value="QB">QB</option>
+                  <option value="RB">RB</option>
+                  <option value="WR">WR</option>
+                  <option value="TE">TE</option>
+                  <option value="DST">DST</option>
+                  <option value="K">K</option>
+                </select>
+              </div>
+              <div class="field field-price">
+                <label for="inPrice">Price</label>
+                <div class="price-wrap">
+                  <span class="dollar">$</span>
+                  <input id="inPrice" type="number" min="0" step="1" inputmode="numeric" placeholder="0" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="inTeam">Won by</label>
+              <select id="inTeam"></select>
+            </div>
+
+            <div id="entryNote" class="entry-note" hidden></div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="btnAddPick">Add pick</button>
+          </form>
+
+          <div class="team-chips" id="teamChips"></div>
+        </div>
+
+        <div class="card card-market">
+          <div class="card-head"><h2>Market</h2></div>
+          <div id="marketBody"></div>
+        </div>
+
+        <div class="card card-nom">
+          <div class="card-head">
+            <h2>Nomination</h2>
+            <button class="btn btn-ghost btn-sm" id="btnNomSkip">Skip →</button>
+          </div>
+          <div id="nomBody"></div>
+          <div class="timer-row">
+            <div class="timer" id="timerDisplay">0:30</div>
+            <button class="btn btn-sm" id="btnTimerStart">Start</button>
+            <button class="btn btn-sm btn-ghost" id="btnTimerReset">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-teams">
+        <div class="section-head">
+          <h2>Teams</h2>
+          <div class="seg" id="teamSortSeg">
+            <button data-sort="order" class="is-active">Order</button>
+            <button data-sort="left">$ Left</button>
+            <button data-sort="max">Max bid</button>
+          </div>
+        </div>
+        <div class="team-grid" id="teamGrid"></div>
+
+        <div class="section-head"><h2>Picks <span class="muted" id="pickCountLabel"></span></h2></div>
+        <div class="feed" id="pickFeed"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= BOARD ================= -->
+  <section class="panel" data-panel="board" hidden>
+    <div class="section-head">
+      <h2>Draft board</h2>
+      <div class="row-actions">
+        <button class="btn btn-sm" id="btnExportCsv">Export CSV</button>
+        <button class="btn btn-sm btn-ghost" id="btnPrint">Print</button>
+      </div>
+    </div>
+    <div class="board-scroll"><table class="board" id="boardTable"></table></div>
+  </section>
+
+  <!-- ================= PLAYERS ================= -->
+  <section class="panel" data-panel="players" hidden>
+    <div class="section-head">
+      <h2>Player pool</h2>
+      <span class="muted" id="poolCount"></span>
+    </div>
+    <div class="filterbar">
+      <input id="poolSearch" type="search" placeholder="Search players…" spellcheck="false">
+      <div class="seg" id="poolPosSeg">
+        <button data-pos="ALL" class="is-active">All</button>
+        <button data-pos="QB">QB</button>
+        <button data-pos="RB">RB</button>
+        <button data-pos="WR">WR</button>
+        <button data-pos="TE">TE</button>
+        <button data-pos="DST">DST</button>
+        <button data-pos="K">K</button>
+      </div>
+      <label class="check"><input type="checkbox" id="poolHideDrafted" checked> Hide drafted</label>
+    </div>
+    <div class="pool-scroll"><table class="pool" id="poolTable"></table></div>
+  </section>
+
+  <!-- ================= HISTORY ================= -->
+  <section class="panel" data-panel="history" hidden>
+    <div class="section-head">
+      <h2>Past drafts</h2>
+      <span class="muted">2018–2025, from the league spreadsheet</span>
+    </div>
+    <div class="filterbar">
+      <input id="histSearch" type="search" placeholder="Look up any player's price history…" spellcheck="false">
+      <div class="seg" id="histYearSeg"></div>
+    </div>
+    <div id="histResult"></div>
+    <div class="board-scroll"><table class="board" id="histTable"></table></div>
+  </section>
+
+  <!-- ================= SETUP ================= -->
+  <section class="panel" data-panel="setup" hidden>
+    <div class="setup-grid">
+
+      <div class="card">
+        <div class="card-head"><h2>League</h2></div>
+        <div class="field-row">
+          <div class="field">
+            <label for="setBudget">Budget per team</label>
+            <div class="price-wrap"><span class="dollar">$</span><input id="setBudget" type="number" min="1" step="1"></div>
+          </div>
+          <div class="field">
+            <label for="setYear">Season</label>
+            <input id="setYear" type="number" min="2000" max="2100" step="1">
+          </div>
+        </div>
+        <div class="field">
+          <label for="setMyTeam">My team</label>
+          <select id="setMyTeam"></select>
+        </div>
+        <div class="field">
+          <label for="setTimer">Bid clock (seconds, 0 = off)</label>
+          <input id="setTimer" type="number" min="0" max="600" step="5">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Roster slots</h2></div>
+        <div class="slots-grid" id="slotsGrid"></div>
+        <p class="note">Total roster size: <strong id="slotTotal"></strong> per team. Bench slots accept any position; FLEX accepts RB, WR and TE.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Teams</h2>
+          <button class="btn btn-sm" id="btnAddTeam">+ Add team</button>
+        </div>
+        <div id="teamEditor"></div>
+        <p class="note">Drag is not needed — the order here is the nomination order.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Backup &amp; data</h2></div>
+        <div class="btn-stack">
+          <button class="btn" id="btnExportJson">Download backup (.json)</button>
+          <label class="btn btn-file">Restore backup<input type="file" id="fileJson" accept=".json,application/json" hidden></label>
+          <label class="btn btn-file">Import player list (.csv)<input type="file" id="filePlayersCsv" accept=".csv,text/csv" hidden></label>
+          <button class="btn" id="btnExportCsv2">Export draft board (.csv)</button>
+        </div>
+        <p class="note" id="importNote">CSV player list columns: <code>name,pos</code> — optional <code>team</code>, <code>value</code>. A header row is detected automatically.</p>
+        <hr>
+        <div class="btn-stack">
+          <button class="btn btn-danger" id="btnResetPicks">Clear all picks</button>
+          <button class="btn btn-danger" id="btnResetAll">Reset everything</button>
+        </div>
+        <p class="note">Your draft lives in this browser's local storage. Download a backup before the draft and after it finishes.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<div id="toasts" class="toasts"></div>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <button class="modal-x" id="modalClose" aria-label="Close">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="data/history.js"></script>
+<script src="data/players.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
